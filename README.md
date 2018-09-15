@@ -2,6 +2,8 @@
 
 Purge old room events from synapse, a homeserver for the Matrix network.
 
+Currently, only remote events are purged. Events sent by local users are not deleted, as they may represent the only copies of this content in existence.
+
 ## Prerequisites
 
 You need:
