@@ -1,0 +1,14 @@
+version: "3.4"
+
+services:
+  app:
+    build: .
+    image: decentralize/synapse-purge
+    env_file: .env
+    networks:
+      - db
+
+networks:
+  db:
+    external:
+      name: synapse_backend
