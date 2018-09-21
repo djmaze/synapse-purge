@@ -56,3 +56,7 @@ The order of operation is as follows:
 * For each room:
   * A purge is initiated through the synapse admin API.
   * The API is polled every half second for completion of the purge, until it is complete.
+
+## Support
+
+Need help or having ideas for improvement? Join our [matrix room](https://matrix.to/#/!jMxweyLkWUsGViTtkk:strahlungsfrei.de).
