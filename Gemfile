@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 
-gem "dotenv"
-gem "matrix_sdk", "~> 0.0.3"
-gem "pg"
+gem 'dotenv'
+gem 'matrix_sdk', '~> 1'
+gem 'pg'
+gem 'ruby-progressbar'
 
 group :development do
-  gem "pry"
+  gem 'pry'
 end
