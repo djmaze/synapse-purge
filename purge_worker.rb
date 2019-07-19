@@ -61,9 +61,11 @@ class PurgeWorker
         rescue MatrixSdk::MatrixConnectionError => e
           visualizer.room_fail(room, e.message)
           to_purge.push(room)
+          next
         rescue EOFError => e
           visualizer.room_fail(room, e.to_s)
           to_purge.push(room)
+          next
         end
 
         # If only allowing one purge at the same time, skip the multi-purge code
