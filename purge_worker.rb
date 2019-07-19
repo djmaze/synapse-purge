@@ -74,7 +74,7 @@ class PurgeWorker
         end
 
         active[room] = purge_id
-      else
+      else # if active.count >= max_active
         # Update the purge status on all active purges
         active.each do |room, purge_id|
           begin
@@ -85,9 +85,9 @@ class PurgeWorker
             visualizer.room_end
             active.delete room
           rescue StandardError => e
-            # Makes output a bit too spammy during connection failures or
-            # Synapse overloads
-            #  visualizer.room_fail room, e.to_s
+            ## Makes output a bit too spammy during connection failures or
+            ## Synapse overloads
+            # visualizer.room_fail room, e.to_s
             true
           end
         end
