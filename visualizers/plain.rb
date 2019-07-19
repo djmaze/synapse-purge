@@ -26,4 +26,3 @@ module Visualizers
     end
   end
 end
-

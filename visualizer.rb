@@ -27,6 +27,7 @@ class Visualizer
 end
 
 module Visualizers
+  autoload :Dummy, './visualizers/dummy'
   autoload :Plain, './visualizers/plain'
   autoload :Verbose, './visualizers/verbose'
 end

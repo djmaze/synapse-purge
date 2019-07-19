@@ -6,9 +6,9 @@ require 'dotenv/load'
 require 'matrix_sdk'
 
 require './purge_worker'
-require './visualizer'
 require './synapse_client'
 require './synapse_db'
+require './visualizer'
 
 puts 'Setting up DB link...'
 db = SynapseDb.new ENV.fetch('DATABASE_URL')
@@ -26,6 +26,7 @@ days = ENV.fetch('DAYS_TO_KEEP', 120).to_i
 since = Time.now - (24 * 60 * 60 * days)
 max_active = ENV.fetch('MAX_ACTIVE_PURGES', 5).to_i
 verbose = ENV.fetch('VERBOSE', 0).to_i == 1
+silent = ENV.fetch('SILENT', 0).to_i == 1
 ignore_local = ENV.fetch('IGNORE_LOCAL', 1).to_i == 1
 
 puts 'Fetching rooms from DB...'
@@ -36,7 +37,11 @@ purge_client = PurgeWorker.new client, rooms,
                                max_active: max_active,
                                since: since
 
-purge_client.visualizer = Visualizers::Verbose.new(purge_client) if verbose
+if silent
+  purge_client.visualizer = Visualizers::Dummy.new(purge_client)
+elsif verbose
+  purge_client.visualizer = Visualizers::Verbose.new(purge_client)
+end
 
 puts 'Starting purge...'
 purge_client.run
