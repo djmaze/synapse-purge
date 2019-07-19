@@ -80,9 +80,7 @@ class PurgeWorker
         # Update the purge status on all active purges
         active.each do |room, purge_id|
           begin
-            status = client.get_purge_status(purge_id)
-
-            next unless status == :active
+            next unless client.purge_finished?(purge_id)
 
             visualizer.room_end
             active.delete room
