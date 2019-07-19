@@ -2,7 +2,8 @@
 
 class PurgeWorker
   attr_reader :client, :rooms, :max_active
-  attr_accessor :since, :visualizer
+  attr_writer :visualizer
+  attr_accessor :since
 
   def initialize(client, rooms,
                  ignore_local: true,
@@ -18,9 +19,12 @@ class PurgeWorker
 
     @client = client
     @rooms = rooms
-    @visualizer = Visualizers::Plain.new(self)
     self.max_active = max_active
     @since = since
+  end
+
+  def visualizer
+    @visualizer ||= Visualizers::Plain.new(self)
   end
 
   def max_active=(max_active)
