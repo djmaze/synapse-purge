@@ -5,6 +5,8 @@ require 'erb'
 class SynapseClient
   STATUS_CHECK_DELAY_IN_SECONDS = 0.5
 
+  attr_reader :client
+
   def initialize(url:, token: nil, username: nil, password: nil)
     @client = MatrixSdk::Client.new url
 
