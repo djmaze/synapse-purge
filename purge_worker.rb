@@ -68,7 +68,7 @@ class PurgeWorker
 
         # If only allowing one purge at the same time, skip the multi-purge code
         if max_active == 1
-          client.wait_for_purge_completion(purge_id)
+          client.wait_for_purge_completion(purge_id) { visualizer.update }
           visualizer.room_end(room)
           next
         end

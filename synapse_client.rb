@@ -35,6 +35,8 @@ class SynapseClient
       break if purge_finished? purge_id
 
       sleep STATUS_CHECK_DELAY_IN_SECONDS
+
+      yield if block_given?
     end
   end
 
