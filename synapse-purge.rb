@@ -1,35 +1,49 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'bundler/setup'
 require 'dotenv/load'
 require 'matrix_sdk'
 
+require './purge_worker'
 require './synapse_client'
 require './synapse_db'
+require './visualizer'
 
+puts 'Setting up DB link...'
 db = SynapseDb.new ENV.fetch('DATABASE_URL')
+
+puts 'Setting up Synapse link...'
 client = SynapseClient.new(
   url: ENV.fetch('HOMESERVER_URL'),
-  username: ENV.fetch('ADMIN_USERNAME'),
-  password: ENV.fetch('ADMIN_PASSWORD')
+  token: ENV.fetch('ADMIN_TOKEN', nil),
+  username: ENV.fetch('ADMIN_USERNAME', nil),
+  password: ENV.fetch('ADMIN_PASSWORD', nil)
 )
+
+# Read environment variables
 days = ENV.fetch('DAYS_TO_KEEP', 120).to_i
-since = Time.now - (24*60*60*days)
+since = Time.now - (24 * 60 * 60 * days)
+max_active = ENV.fetch('MAX_ACTIVE_PURGES', 5).to_i
+verbose = ENV.fetch('VERBOSE', 0).to_i == 1
+silent = ENV.fetch('SILENT', 0).to_i == 1
+ignore_local = ENV.fetch('IGNORE_LOCAL', 1).to_i == 1
+
+puts 'Fetching rooms from DB...'
 rooms = db.rooms
 
-STDOUT.sync = true
-puts "Purging events since #{since.to_s} (#{since.to_i * 1000}) in #{rooms.count} rooms"
+purge_client = PurgeWorker.new client, rooms,
+                               ignore_local: ignore_local,
+                               max_active: max_active,
+                               since: since
 
-rooms.each do |room|
-  puts(room)
-
-  begin
-    purge_id = client.enqueue_room_purge(room.id, since)
-  rescue MatrixSdk::MatrixRequestError => e
-    STDERR.puts "error purging #{room}: #{e.message}"
-  else
-    client.wait_for_purge_completion(purge_id)
-  end
+if silent
+  purge_client.visualizer = Visualizers::Dummy.new(purge_client)
+elsif verbose
+  purge_client.visualizer = Visualizers::Verbose.new(purge_client)
 end
 
-puts "Done."
+puts 'Starting purge...'
+purge_client.run
+
+client.logout

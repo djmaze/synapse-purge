@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'uri'
 require 'pg'
 
@@ -11,24 +13,24 @@ class SynapseDb
     end
 
     def to_s
-      @id
+      @canonical_alias || @id
     end
   end
 
   def initialize(database_url)
     uri = URI.parse database_url
     @conn = PG.connect(
-                       host: uri.host,
-                       port: uri.port,
-                       user: uri.user,
-                       password: uri.password,
-                       dbname: uri.path[1..-1]
+      host: uri.host,
+      port: uri.port,
+      user: uri.user,
+      password: uri.password,
+      dbname: uri.path[1..-1]
     )
   end
 
   def rooms
     # TODO Get canonical_alias as well
-    @conn.exec("SELECT room_id FROM rooms") do |result|
+    @rooms ||= @conn.exec('SELECT room_id FROM rooms') do |result|
       result.map do |row|
         Room.new row
       end
