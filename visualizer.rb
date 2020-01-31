@@ -21,6 +21,10 @@ class Visualizer
 
   protected
 
+  def since
+    worker.since
+  end
+
   def rooms
     worker.rooms
   end
