@@ -25,6 +25,10 @@ module Visualizers
       progressbar.refresh
     end
 
+    def message(message)
+      progressbar.log message
+    end
+
     def room_begin(room)
       progressbar.log format('%<room>s: begun',
                              room: room.to_s.rjust(max_width))
@@ -42,10 +46,16 @@ module Visualizers
       progressbar.increment
     end
 
+    def room_message(room, message)
+      progressbar.log format('%<room>s: %<message>s',
+                             room: room.to_s.rjust(max_width),
+                             message: message)
+    end
+
     def progressbar
       @progressbar ||= ProgressBar.create \
         format: '%c/%C %t (%p%%) |%B| %a',
-        title: 'Purged'
+        title: 'Processed'
     end
   end
 end

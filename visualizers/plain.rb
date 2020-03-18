@@ -6,7 +6,7 @@ module Visualizers
       STDOUT.sync = true
 
       puts
-      puts "Purging events since #{since} (#{since.to_i * 1000}) in #{rooms.count} rooms"
+      puts "Processing #{rooms.count} rooms..."
       @start = Time.now
     end
 
@@ -14,7 +14,11 @@ module Visualizers
       @end = Time.now
       duration = Time.at(@end - @start).utc.strftime('%H:%M:%S')
 
-      puts "Event purge finished in #{duration} seconds"
+      puts "Finished in #{duration} seconds"
+    end
+
+    def message(message)
+      puts message
     end
 
     def room_begin(room)
@@ -23,6 +27,10 @@ module Visualizers
 
     def room_fail(room, reason)
       warn "#{room}: #{reason}"
+    end
+
+    def room_message(room, message)
+      puts "#{room}: #{message}"
     end
   end
 end

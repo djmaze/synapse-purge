@@ -17,8 +17,10 @@ class SynapseDb
     end
   end
 
+  attr_reader :conn, :uri
+
   def initialize(database_url)
-    uri = URI.parse database_url
+    @uri = URI.parse database_url
     @conn = PG.connect(
       host: uri.host,
       port: uri.port,
