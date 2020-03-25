@@ -22,7 +22,10 @@ class CompressWorker
   end
 
   def max_active=(max_active)
-    max_active = rooms.count if max_active <= 0
+    # Not a good idea to run too many parallel compressions,
+    # the memory usage of the compressor spikes hard
+    max_active = 1 if max_active <= 0
+    max_active = 3 if max_active > 3
 
     @max_active = max_active
   end
