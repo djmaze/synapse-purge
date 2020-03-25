@@ -76,10 +76,9 @@ class CompressWorker
           next if thread.alive?
 
           # Raise any pending exceptions to the main thread for handling
-          thread.value
+          thread.join
         rescue StandardError => e
           visualizer.room_fail room, "#{e.class}: #{e.message}"
-          true
         end
 
         visualizer.room_end room
