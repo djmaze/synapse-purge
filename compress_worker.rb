@@ -45,6 +45,7 @@ class CompressWorker
     loop do
       break if active.empty? && to_compress.empty?
 
+      # Start a new compression thread if below maximum active
       if active.count < max_active && to_compress.any?
         room = to_compress.shift
 
@@ -55,6 +56,10 @@ class CompressWorker
           thread.report_on_exception = false
 
           visualizer.room_begin room
+
+          # Nothing should technically be able to hit this, unless the thread
+          # fails to create/start.
+          # But best to not crash in case that happens
         rescue StandardError => e
           visualizer.room_fail room, "#{e.class}: #{e.full_message}"
 
@@ -65,10 +70,12 @@ class CompressWorker
         active[room] = thread
       end
 
+      # Check for finished - or failed - compressions
       active.each do |room, thread|
         begin
           next if thread.alive?
 
+          # Raise any pending exceptions to the main thread for handling
           thread.value
         rescue StandardError => e
           visualizer.room_fail room, "#{e.class}: #{e.message}"
