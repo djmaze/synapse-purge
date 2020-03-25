@@ -13,17 +13,17 @@ class Visualizer
 
   def end; end
 
+  def message(message); end
+
   def room_begin(room); end
 
   def room_fail(room, reason); end
 
   def room_end(room); end
 
-  protected
+  def room_message(room, message); end
 
-  def since
-    worker.since
-  end
+  protected
 
   def rooms
     worker.rooms
