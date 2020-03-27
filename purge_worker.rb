@@ -36,16 +36,18 @@ class PurgeWorker
   def run
     to_purge = rooms.dup
     active = {}
+    tick = 0 # To not update the purge status too often
 
     visualizer.begin
 
     loop do
       break if active.empty? && to_purge.empty?
+      tick += 1
 
+      # Start another purge if below maximum active
       if active.count < max_active
         room = to_purge.shift
 
-        purge_id = nil
         begin
           purge_id = client.enqueue_room_purge(room, since)
           visualizer.room_begin(room)
@@ -76,14 +78,18 @@ class PurgeWorker
         end
 
         active[room] = purge_id
-      else # if active.count >= max_active
-        # Update the purge status on all active purges
+      end
+
+      if tick >= 10
+        tick = 0
+
+        # Check for finished - or failed - purges
         active.each do |room, purge_id|
           begin
             next unless client.purge_finished?(purge_id)
 
-            visualizer.room_end
-            active.delete room
+            visualizer.room_end(room)
+            active.delete(room)
           rescue StandardError => e
             ## Makes output a bit too spammy during connection failures or
             ## Synapse overloads
@@ -91,10 +97,10 @@ class PurgeWorker
             true
           end
         end
-
-        visualizer.update
-        sleep 1
       end
+
+      visualizer.update
+      sleep 0.5
     end
 
     visualizer.end
