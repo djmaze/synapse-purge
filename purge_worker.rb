@@ -45,7 +45,7 @@ class PurgeWorker
       tick += 1
 
       # Start another purge if below maximum active
-      if active.count < max_active
+      if active.count < max_active && to_purge.any?
         room = to_purge.shift
 
         begin
@@ -85,11 +85,16 @@ class PurgeWorker
 
         # Check for finished - or failed - purges
         active.each do |room, purge_id|
+          if room.nil? || purge_id.nil?
+            active.delete room
+            next
+          end
+
           begin
             next unless client.purge_finished?(purge_id)
 
-            visualizer.room_end(room)
             active.delete(room)
+            visualizer.room_end(room)
           rescue StandardError => e
             ## Makes output a bit too spammy during connection failures or
             ## Synapse overloads
