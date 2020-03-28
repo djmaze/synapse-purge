@@ -137,6 +137,11 @@ class CompressWorker
 
     begin
       db.conn.exec sql
+    rescue PG::UnableToSend
+      # Most likely lost connection to postgres, reconnect and try again
+      # TODO: Avoid breaking any running query?
+      db.conn.reset
+      db.conn.exec sql
     rescue PG::SyntaxError
       FileUtils.copy(temp.path, '/tmp/error.sql')
       puts 'Copied broken SQL to /tmp/error.sql'
