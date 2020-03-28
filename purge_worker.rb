@@ -55,13 +55,13 @@ class PurgeWorker
         # HTTP 4xx means a purge is either running or not able to run,
         # so skip the current room
         rescue MatrixSdk::MatrixRequestError => e
-          visualizer.room_fail(room, e.message)
+          visualizer.room_fail(room, "#{e.class}: #{e.message}")
           visualizer.room_end(room)
           next
 
         # Don't skip the purge on HTTP 5XX or connection errors
         rescue MatrixSdk::MatrixConnectionError => e
-          visualizer.room_fail(room, e.message)
+          visualizer.room_fail(room, "#{e.class}: #{e.message}")
           to_purge.push(room)
           next
         rescue EOFError => e
