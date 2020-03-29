@@ -12,6 +12,7 @@ class CompressWorker
     @db = db
     @rooms = rooms
     @binary = binary
+    @dbmutex = Mutex.new
 
     self.max_active = max_active
     self.minimum_rows = minimum_rows
@@ -135,13 +136,20 @@ class CompressWorker
       result
     )
 
-    begin
-      db.conn.exec sql
-    rescue PG::SyntaxError
-      FileUtils.copy(temp.path, '/tmp/error.sql')
-      puts 'Copied broken SQL to /tmp/error.sql'
+    @dbmutex.synchronize do
+      begin
+        db.conn.exec sql
+      rescue PG::UnableToSend
+        # Most likely lost connection to postgres, reconnect and try again
+        # TODO: Avoid breaking any running query?
+        db.conn.reset
+        db.conn.exec sql
+      rescue PG::SyntaxError
+        FileUtils.copy(temp.path, '/tmp/error.sql')
+        puts 'Copied broken SQL to /tmp/error.sql'
 
-      raise
+        raise
+      end
     end
   ensure
     temp.unlink
