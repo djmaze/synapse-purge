@@ -10,7 +10,7 @@ class PurgeWorker
                  max_active: 5,
                  since: 24 * 60 * 60)
     if ignore_local
-      local_domain = MatrixSdk::MXID.new(client.client.mxid).domain
+      local_domain = MatrixSdk::MXID.new(client.client.mxid.to_s).domain
       rooms = rooms.reject do |r|
         r = MatrixSdk::MXID.new r.to_s
         r.domain == local_domain

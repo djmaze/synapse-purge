@@ -24,7 +24,7 @@ class SynapseClient
   def enqueue_room_purge(room_id, since)
     result = @client.api.request(
       :post,
-      :client_r0, "/admin/purge_history/#{ERB::Util.url_encode room_id}",
+      :admin_v1, "/purge_history/#{ERB::Util.url_encode room_id}",
       body: { purge_up_to_ts: since.to_i * 1000 }
     )
     result[:purge_id]
@@ -42,16 +42,20 @@ class SynapseClient
 
   def purge_running?(purge_id)
     get_purge_status(purge_id) == :active
+  rescue MatrixSdk::MatrixNotFoundError
+    false
   end
 
   def purge_finished?(purge_id)
     get_purge_status(purge_id) != :active
+  rescue MatrixSdk::MatrixNotFoundError
+    true
   end
 
   def get_purge_status(purge_id)
     result = @client.api.request(
       :get,
-      :client_r0, "/admin/purge_history_status/#{purge_id}"
+      :admin_v1, "/purge_history_status/#{ERB::Util.url_encode purge_id}"
     )
     result[:status].to_sym
   end
